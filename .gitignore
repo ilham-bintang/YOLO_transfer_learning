@@ -113,3 +113,8 @@ venv.bak/
 
 # ignore .DS file
 .DS_Store
+
+/.vscode
+/datasets
+/obj
+/data

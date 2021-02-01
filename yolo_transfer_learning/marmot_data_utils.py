@@ -89,7 +89,7 @@ def transform_MarmotBBox_to_YOLO(obj_class, x, y, w, h, imgw, imgh) -> Tuple:
 
 
 def create_training_folder(
-    file_in_pos_path: str, file_in_neg_path, xml_in_path, file_out_path
+    file_in_pos_path: str, xml_in_path, file_out_path
 ) -> Tuple:
     """
     Search all the files in marmot dataset directory , call function to convert all the files and output them to a new
@@ -108,9 +108,9 @@ def create_training_folder(
     xml_list = []
     text_list = []
 
-    for filename in glob.glob(file_in_pos_path + "*.bmp"):
+    for filename in glob.glob(file_in_pos_path + "*.tif"):
         # Convert bmp to jpg.
-        img_name = filename.split("/")[-1].strip(".bmp")
+        img_name = filename.split("/")[-1].strip(".tif")
         img_path = file_out_path + img_name + ".jpg"
         img = Image.open(filename).save(img_path)
         image_list.append(img_path)
@@ -125,11 +125,11 @@ def create_training_folder(
         xml_path = xml_in_path + img_name + ".xml"
         xml_list.append(xml_path)
 
-    for filename in glob.glob(file_in_neg_path + "*.bmp"):
-        # Convert bmp to jpg.
-        img_name = filename.split("/")[-1].strip(".bmp")
-        img_path = file_out_path + img_name + ".jpg"
-        img = Image.open(filename).save(img_path)
+    # for filename in glob.glob(file_in_neg_path + "*.bmp"):
+    #     # Convert bmp to jpg.
+    #     img_name = filename.split("/")[-1].strip(".bmp")
+    #     img_path = file_out_path + img_name + ".jpg"
+    #     img = Image.open(filename).save(img_path)
 
     return image_list, text_list, xml_list
 
@@ -173,11 +173,8 @@ def write_yolo_file(image_list, text_list, xml_list) -> Tuple:
         root = tree.getroot()
 
         target_labels = [
-            "TableCaption",
-            "TableBody",
-            "TableFootnote",
-            "Paragraph",
-            "Table",
+            "EmbeddedFormula",
+            "IsolatedFormula"
         ]
 
         text_to_save = ""
@@ -249,7 +246,7 @@ def return_bbox(root, label, imgh) -> List:
 
     """
     bbox_list = []
-    for table in root.findall(".//Composite[@Label='{}']".format(label)):
+    for table in root.findall("'{}'".format(label)):
         x, y, w, h = list(map(hex_to_float, table.get("BBox").split()))
         y = imgh - y
         h = imgh - h
@@ -279,11 +276,8 @@ def draw_pic(img_path, xml_path, label) -> None:
         target_labels = [label]
     else:
         target_labels = [
-            "Table",
-            "TableCaption",
-            "TableBody",
-            "TableFootnote",
-            "Paragraph",
+            "EmbeddedFormula",
+            "IsolatedFormula"
         ]
 
     for i, label in enumerate(target_labels):
